@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div>
+    <div class="abstand">
+        Errate die geheime Zahl...<br><br>
+    </div>
+    <div class="abstand">
+        <form method="post" action="/result">
+            <input type="text" name="rate" placeholder="Gib mir eine Zahl">
+            <br><br>
+            <button type="submit">Bestätigen</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

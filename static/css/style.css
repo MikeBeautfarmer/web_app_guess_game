@@ -1,0 +1,14 @@
+body {
+    background-color: #dedede
+}
+
+.stil {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.abstand {
+    margin-top: 50px;
+}
