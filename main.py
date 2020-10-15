@@ -27,7 +27,6 @@ def result():
     #  rate = int(request.form.get("rate"))
     geheime_zahl = int(request.cookies.get("geheime_zahl"))  # !!!!!!!!!!!!!!!!   FRAGEN   !!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
     if rate == geheime_zahl:  # Wenn geheime Zahl erraten wird!
         nachricht = "Korrekt! Die geheime Zahl ist {0}".format(str(geheime_zahl))  # Nachricht Ausgabe
         response = make_response(render_template("result2.html", nachricht=nachricht))  # Nachricht in result.html
