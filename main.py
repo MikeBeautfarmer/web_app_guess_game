@@ -3,8 +3,6 @@ import random
 
 app = Flask(__name__)
 
-geheime_zahl = random.randint(1, 50)
-
 
 @app.route("/", methods=["GET"])
 def index():
@@ -20,8 +18,15 @@ def index():
 
 @app.route("/result", methods=["POST"])
 def result():
-    rate = int(request.form.get("rate"))
-    geheime_zahl = int(request.cookies.get("geheime_zahl"))
+    try:
+        rate = int(request.form.get("rate"))
+    except ValueError:
+        nachricht = "Bitte eine Zahl eingeben!"
+        return render_template("result.html", nachricht=nachricht)
+
+    #  rate = int(request.form.get("rate"))
+    geheime_zahl = int(request.cookies.get("geheime_zahl"))  # !!!!!!!!!!!!!!!!   FRAGEN   !!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
     if rate == geheime_zahl:  # Wenn geheime Zahl erraten wird!
         nachricht = "Korrekt! Die geheime Zahl ist {0}".format(str(geheime_zahl))  # Nachricht Ausgabe
