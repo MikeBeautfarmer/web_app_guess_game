@@ -1,19 +1,50 @@
-from flask import Flask, render_template, request, make_response
+from flask import Flask, render_template, request, redirect, url_for, make_response
+
+from models import User, db
+
 import random
 
 app = Flask(__name__)
+db.create_all()
 
 
 @app.route("/", methods=["GET"])
 def index():
-    geheime_zahl = request.cookies.get("geheime_zahl")
+    email_adress = request.cookies.get("email")
 
-    response = make_response(render_template("index.html"))
-    if not geheime_zahl:
-        neues_geheimnis = random.randint(1, 50)
-        response.set_cookie("geheime_zahl", str(neues_geheimnis))
+    if email_adress:
+        user = db.query(User).filter_by(email=email_adress).first()
+    else:
+        user = None
+
+    return render_template("index2.html", user=user)
+
+
+@app.route("/game", methods=["GET"])
+def game():
+    return render_template("index.html")
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    name = request.form.get("user-name")
+    email = request.form.get("user-email")
+
+    geheime_zahl = random.randint(1, 50)
+
+    user = db.query(User).filter_by(email=email).first()
+
+    if not user:
+        user = User(name=name, email=email, geheime_zahl=geheime_zahl)
+
+        db.add(user)
+        db.commit()
+
+    response = make_response(redirect(url_for("game")))
+    response.set_cookie("email", email)
 
     return response
+    # response = make_response(redirect(url_for("")))
 
 
 @app.route("/result", methods=["POST"])
@@ -24,18 +55,23 @@ def result():
         nachricht = "Bitte eine Zahl eingeben!"
         return render_template("result.html", nachricht=nachricht)
 
-    #  rate = int(request.form.get("rate"))
-    geheime_zahl = int(request.cookies.get("geheime_zahl"))  # !!!!!!!!!!!!!!!!   FRAGEN   !!!!!!!!!!!!!!!!!!!!!!!!!!
+    email_adress = request.cookies.get("email")
 
-    if rate == geheime_zahl:  # Wenn geheime Zahl erraten wird!
-        nachricht = "Korrekt! Die geheime Zahl ist {0}".format(str(geheime_zahl))  # Nachricht Ausgabe
-        response = make_response(render_template("result2.html", nachricht=nachricht))  # Nachricht in result.html
-        response.set_cookie("geheime_zahl", str(random.randint(1, 50)))  # Neue geheime Zahl wird erstellt
+    user = db.query(User).filter_by(email=email_adress).first()
+
+    if rate == user.geheime_zahl:  # Wenn geheime Zahl erraten wird!
+        nachricht = "Korrekt! Die geheime Zahl ist {0}".format(str(user.geheime_zahl))  # Nachricht Ausgabe
+        response = make_response(render_template("result2.html", nachricht=nachricht))  # Nachricht in result2.html
+        neues_geheimnis = random.randint(1, 50)
+        user.geheime_zahl = neues_geheimnis
+        db.add(user)
+        db.commit()
         return response
-    elif rate < geheime_zahl:  # Wenn Ratezahl kleiner als geheime Zahl
+
+    elif rate < user.geheime_zahl:  # Wenn Ratezahl kleiner als geheime Zahl
         nachricht = "Falsch! . . .   Versuche eine höhere Zahl"  # Nachricht Ausgabe
         return render_template("result.html", nachricht=nachricht)  # Nachricht in result.html
-    elif rate > geheime_zahl:  # Wenn Ratezahl größer als geheime Zahl
+    elif rate > user.geheime_zahl:  # Wenn Ratezahl größer als geheime Zahl
         nachricht = "Falsch! . . .   Versuche eine niedrigere Zahl"  # Nachricht Ausgabe
         return render_template("result.html", nachricht=nachricht)  # Nachricht in result.html
 

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if user %}
+
+<div class="abstand">
+    <p>Hallo {{ user.name }}!</p>
+    <p>Das ist deine E-Mail Adresse: {{ user.email }}</p>
+    <p>Viel Spaß beim Spielen :-)</p>
+    <p><a href="/game">ZUM SPIEL</a></p>
+</div>
+
+{% else %}
+
+<div class="abstand">
+    <div><h3>Herzlich Willkommen</h3></div>
+    <div><p>Du bist zum ersten Mal hier. Bitte trage deine Daten ein.</p></div>
+    <div>
+        <form method="post" action="/login">
+            <input type="text" name="user-name" placeholder="Dein Name"><br><br>
+            <input type="email" name="user-email" placeholder="Deine E-Mail Adresse"><br><br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock %}
