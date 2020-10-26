@@ -1,8 +1,9 @@
+import hashlib
+import random
+import uuid
 from flask import Flask, render_template, request, redirect, url_for, make_response
-
 from models import User, db
 
-import random
 
 app = Flask(__name__)
 db.create_all()
@@ -10,10 +11,10 @@ db.create_all()
 
 @app.route("/", methods=["GET"])
 def index():
-    email_adress = request.cookies.get("email")
+    session_token = request.cookies.get("session_token")
 
-    if email_adress:
-        user = db.query(User).filter_by(email=email_adress).first()
+    if session_token:
+        user = db.query(User).filter_by(session_token=session_token).first()
     else:
         user = None
 
@@ -29,20 +30,29 @@ def game():
 def login():
     name = request.form.get("user-name")
     email = request.form.get("user-email")
+    password = request.form.get("user-password")
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
     geheime_zahl = random.randint(1, 50)
 
     user = db.query(User).filter_by(email=email).first()
 
     if not user:
-        user = User(name=name, email=email, geheime_zahl=geheime_zahl)
+        user = User(name=name, email=email, geheime_zahl=geheime_zahl, password=hashed_password)
 
         db.add(user)
         db.commit()
 
-    response = make_response(redirect(url_for("game")))
-    response.set_cookie("email", email)
+    if hashed_password != user.password:
+        return "Falsches Passwort! Bitte klicke zurück und versuche es nochmals."
 
+    session_token = str(uuid.uuid4())
+    user.session_token = session_token
+    db.add(user)
+    db.commit()
+
+    response = make_response(redirect(url_for("game")))
+    response.set_cookie("session_token", session_token, httponly=True, samesite="Strict")
     return response
     # response = make_response(redirect(url_for("")))
 
@@ -55,9 +65,9 @@ def result():
         nachricht = "Bitte eine Zahl eingeben!"
         return render_template("result.html", nachricht=nachricht)
 
-    email_adress = request.cookies.get("email")
+    session_token = request.cookies.get("session_token")
 
-    user = db.query(User).filter_by(email=email_adress).first()
+    user = db.query(User).filter_by(session_token=session_token).first()
 
     if rate == user.geheime_zahl:  # Wenn geheime Zahl erraten wird!
         nachricht = "Korrekt! Die geheime Zahl ist {0}".format(str(user.geheime_zahl))  # Nachricht Ausgabe
