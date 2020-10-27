@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Profil bearbeiten{% endblock title %}
+
+{% block content %}
+
+<h3>Profil bearbeiten</h3>
+<form method="post">
+    <p>
+        <strong>Dein Name:</strong>
+        <input type="text" value="{{ user.name }}" name="profile-name">
+    </p>
+    <p>
+        <strong>Deine E-Mail Adresse:</strong>
+        <input type="email" value="{{ user.email }}" name="profile-email">
+    </p>
+
+    <h4>Passwort ändern</h4>
+    <p>Wenn du dein Passwort ändern willst, fülle bitte die unteren Felder auch aus. Wenn du es nicht ändern willst dann lasse die Felder einfach frei.</p>
+    <p>
+        <strong>Alter Passwort:</strong>
+        <input type="password" name="old-password">
+    </p>
+    <p>
+        <strong>Neues Passwort:</strong>
+        <input type="password" name="new-password">
+    </p>
+    <button type="submit">Speichern</button>
+</form>
+
+{% endblock content %}
