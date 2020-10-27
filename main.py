@@ -140,7 +140,7 @@ def profile_delete():
     elif request.method == "POST":
 
         user.deleted = True
-        db.delete(user)
+        db.add(user)
         db.commit()
 
         return redirect(url_for("index"))
